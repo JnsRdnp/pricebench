@@ -3,9 +3,6 @@ const router = express.Router();
 
 import userController from '../controllers/userController.js';
 
-
-
-
 /**
  * @swagger
  * /api/users:
