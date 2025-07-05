@@ -11,8 +11,17 @@ export function findCpusByName(partialName) {
     SELECT id, name, singlethread, multithread
     FROM cpubenchmarks
     WHERE name LIKE ?
+    ORDER BY
+      CASE
+        WHEN name = ? THEN 0
+        WHEN name LIKE ? THEN 1
+        ELSE 2
+      END,
+      name
   `);
 
   const likeParam = `%${partialName}%`;
-  return stmt.all(likeParam);
+  const startsWithParam = `${partialName}%`;
+
+  return stmt.all(likeParam, partialName, startsWithParam);
 }
