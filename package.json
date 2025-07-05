@@ -21,7 +21,9 @@
   },
   "homepage": "https://github.com/JnsRdnp/pricebench#readme",
   "dependencies": {
+    "better-sqlite3": "^12.2.0",
     "chai-http": "^5.1.2",
+    "cheerio": "^1.1.0",
     "express": "^5.1.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
