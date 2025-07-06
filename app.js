@@ -3,12 +3,14 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './swagger.js';
 import userRoutes from './routes/userRoutes.js';
 import cpuRoutes from './routes/cpuRoutes.js'
+import priceRoutes from './routes/priceRoutes.js'
 
 const app = express();
 
 app.use(express.json());
 app.use('/api/users', userRoutes);
 app.use('/api/cpus', cpuRoutes);
+app.use('/api/price', priceRoutes);
 
 // Swagger UI setup
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
