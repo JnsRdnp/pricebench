@@ -4,6 +4,8 @@ import * as cheerio from 'cheerio';
 const db = new Database('./db/data.db');  // your DB file path
 
 // Create table if not exists
+db.exec(`DROP TABLE IF EXISTS cpubenchmarks;`);
+
 db.exec(`
   CREATE TABLE IF NOT EXISTS cpubenchmarks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -113,6 +115,8 @@ parseAndUpdateMulti('./raws/cpuMulti7.html', 'multithread');
 
 
 // GPU PART //
+db.exec(`DROP TABLE IF EXISTS gpubenchmarks;`);
+
 db.exec(`
   CREATE TABLE IF NOT EXISTS gpubenchmarks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -131,21 +135,23 @@ function parseAndUpdateGPU(filePath) {
   const html = fs.readFileSync(filePath, 'utf8');
   const $ = cheerio.load(html);
 
-  $('tr[id^="gpu"]').each((_, elem) => {
-    const tds = $(elem).find('td');
-    const name = $(tds[0]).text().trim().replace(/\s+/g, ' ');
-    const scoreText = $(tds[1]).text().replace(/,/g, '').trim();
+  // Select only <li> elements whose id starts with 'rk'
+  $('li[id^="rk"]').each((_, elem) => {
+    const name = $(elem).find('span.prdname').text().trim();
 
-    const score = parseFloat(scoreText);
-    if (!name || isNaN(score)) {
-      console.warn(`Invalid GPU score for "${name}": raw scoreText="${scoreText}"`);
+    // Get the benchmark from span.count, remove commas
+    const benchmarkText = $(elem).find('span.count').text().replace(/,/g, '').trim();
+    const benchmark = parseFloat(benchmarkText);
+
+    if (!name || isNaN(benchmark)) {
+      console.warn(`Invalid GPU benchmark for "${name}": raw benchmarkText="${benchmarkText}"`);
       return;
     }
 
-    upsertGPU.run(name, score);
+    upsertGPU.run(name, benchmark);
+    console.log(`Inserted/Updated: ${name} = ${benchmark}`);
   });
 }
-
 
 
 
