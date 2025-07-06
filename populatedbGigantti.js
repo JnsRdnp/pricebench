@@ -9,7 +9,7 @@ const db = new Database('./db/data.db');
 
 // Create Gigantti products table and upsert
 db.exec(`
-  CREATE TABLE IF NOT EXISTS gigantti_products (
+    CREATE TABLE IF NOT EXISTS gigantti_products (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     sku TEXT UNIQUE,
     name TEXT,
@@ -19,16 +19,18 @@ db.exec(`
     link TEXT,
     cpuName TEXT,
     gpuName TEXT,
-    cpuPerformance REAL,
-    gpuPerformance REAL,
-    combinedValueScore REAL
-  );
+    cpuPerformanceJson TEXT,
+    gpuPerformanceJson TEXT,
+    combinedValueScore REAL,
+    specsJson TEXT
+    );
 `);
 
 const upsertGiganttiProduct = db.prepare(`
   INSERT INTO gigantti_products (
-    sku, name, price, availability, imageUrl, link, cpuName, gpuName, cpuPerformance, gpuPerformance, combinedValueScore
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    sku, name, price, availability, imageUrl, link, cpuName, gpuName,
+    cpuPerformanceJson, gpuPerformanceJson, combinedValueScore, specsJson
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   ON CONFLICT(sku) DO UPDATE SET
     name=excluded.name,
     price=excluded.price,
@@ -37,9 +39,10 @@ const upsertGiganttiProduct = db.prepare(`
     link=excluded.link,
     cpuName=excluded.cpuName,
     gpuName=excluded.gpuName,
-    cpuPerformance=excluded.cpuPerformance,
-    gpuPerformance=excluded.gpuPerformance,
-    combinedValueScore=excluded.combinedValueScore
+    cpuPerformanceJson=excluded.cpuPerformanceJson,
+    gpuPerformanceJson=excluded.gpuPerformanceJson,
+    combinedValueScore=excluded.combinedValueScore,
+    specsJson=excluded.specsJson;
 `);
 
 function parsePriceToNumber(priceStr) {
@@ -124,7 +127,7 @@ function parseGiganttiHtml(html) {
 function saveGiganttiProductsToDb(products) {
   const insert = db.transaction((products) => {
     for (const p of products) {
-      upsertGiganttiProduct.run(
+        upsertGiganttiProduct.run(
         p.sku,
         p.name,
         p.priceNumber,
@@ -133,10 +136,11 @@ function saveGiganttiProductsToDb(products) {
         p.link,
         p.cpuName,
         p.gpuName,
-        p.cpuPerformance?.valueScore || null,
-        p.gpuPerformance?.valueScore || null,
-        p.combinedValueScore
-      );
+        JSON.stringify(p.cpuPerformance),
+        JSON.stringify(p.gpuPerformance),
+        p.combinedValueScore,
+        JSON.stringify(p.specs) // add this line for specs
+        );
     }
   });
   insert(products);
