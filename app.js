@@ -9,7 +9,6 @@ import gpuRoutes from './routes/gpuRoutes.js'
 const app = express();
 
 app.use(express.json());
-app.use('/api/users', userRoutes);
 app.use('/api/cpus', cpuRoutes);
 app.use('/api/gpus', gpuRoutes);
 app.use('/api/price', priceRoutes);
