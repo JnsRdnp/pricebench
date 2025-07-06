@@ -1,7 +1,6 @@
 import express from 'express';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './swagger.js';
-import userRoutes from './routes/userRoutes.js';
 import cpuRoutes from './routes/cpuRoutes.js'
 import priceRoutes from './routes/priceRoutes.js'
 import gpuRoutes from './routes/gpuRoutes.js'
