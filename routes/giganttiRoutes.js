@@ -1,5 +1,5 @@
 import express from 'express';
-import { getGiganttiPC } from '../controllers/giganttiController.js';
+import { getAllGiganttiProducts } from '../controllers/giganttiController.js';
 
 const router = express.Router();
 
@@ -46,6 +46,6 @@ const router = express.Router();
  *         description: Server error
  */
 
-router.get('/', getGiganttiPC);
+router.get('/', getAllGiganttiProducts);
 
 export default router;

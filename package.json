@@ -8,7 +8,9 @@
     "downloadGigantti": "node wgetGigantti.js",
     "downloadBenchmarks": "node wgetBenchmarks.js",
     "benchmarksToDb": "node populatedb.js",
-    "wgetAndPopulateBenchmarks": "npm run downloadBenchmarks && npm run benchmarksToDb",
+    "giganttiTODb": "node populatedbGigantti.js",
+    "buildBenchmarks": "npm run downloadBenchmarks && npm run benchmarksToDb",
+    "buildGigantti": "npm run downloadGigantti && npm run giganttiTODb",
     "start": "node app.js",
     "dev": "nodemon app.js",
     "test": "mocha"

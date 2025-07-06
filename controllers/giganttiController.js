@@ -1,11 +1,11 @@
-import { findGiganttiPC } from "../services/giganttiService.js";
+import { findAllGiganttiProducts } from "../services/giganttiService.js";
 
 /**
  * Express handler to get CPUs by name substring.
  */
-export async function getGiganttiPC(req, res) {
+export async function getAllGiganttiProducts(req, res) {
   try {
-    const products = findGiganttiPC();
+    const products = findAllGiganttiProducts();
     res.json(products);
   } catch (error) {
     console.error('Error fetching Gigantti PCs:', error);
