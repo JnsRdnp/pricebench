@@ -32,8 +32,7 @@ function extractLastComponent(name) {
   return parts[parts.length - 1];
 }
 
-export function findGiganttiPC() {
-  const html = fs.readFileSync('./raws/giganttikoneet.html', 'utf-8');
+function parseGiganttiHtml(html) {
   const $ = cheerio.load(html);
 
   const products = [];
@@ -86,8 +85,27 @@ export function findGiganttiPC() {
     });
   });
 
-  // Sort products by combinedValueScore descending
-  products.sort((a, b) => b.combinedValueScore - a.combinedValueScore);
-
   return products;
+}
+
+export function findGiganttiPC() {
+  const allFiles = [
+    './raws/giganttikoneet1.html',
+    './raws/giganttikoneet2.html',
+    './raws/giganttikoneet3.html',
+    './raws/giganttikoneet4.html',
+  ];
+
+  let allProducts = [];
+
+  for (const file of allFiles) {
+    const html = fs.readFileSync(file, 'utf-8');
+    const products = parseGiganttiHtml(html);
+    allProducts = allProducts.concat(products);
+  }
+
+  // Sort all combined products by combinedValueScore descending
+  allProducts.sort((a, b) => b.combinedValueScore - a.combinedValueScore);
+
+  return allProducts;
 }
