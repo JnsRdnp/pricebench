@@ -7,7 +7,14 @@ const wgetVars = [
   'CPUSINGLE1', 'CPUSINGLE2', 'CPUSINGLE3', 'CPUSINGLE4', 'CPUSINGLE5', 'CPUSINGLE6', 'CPUSINGLE7',
   'CPUMULTI1', 'CPUMULTI2', 'CPUMULTI3', 'CPUMULTI4', 'CPUMULTI5', 'CPUMULTI6', 'CPUMULTI7',
   'GPUBENCH'
-]
+];
+
+// Helper to remove surrounding quotes if present
+function clean(value) {
+  return value?.startsWith('"') && value.endsWith('"')
+    ? value.slice(1, -1)
+    : value;
+}
 
 async function runCmd(cmd) {
   return new Promise((resolve, reject) => {
@@ -27,11 +34,14 @@ async function runCmd(cmd) {
 
 async function runAll() {
   for (const varName of wgetVars) {
-    const cmd = process.env[varName];
+    const rawCmd = process.env[varName];
+    const cmd = clean(rawCmd);
+
     if (!cmd) {
       console.warn(`No command found in env variable: ${varName}`);
       continue;
     }
+
     await runCmd(cmd);
   }
   console.log('All downloads finished!');
