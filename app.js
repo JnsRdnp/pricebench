@@ -5,8 +5,10 @@ import cpuRoutes from './routes/cpuRoutes.js'
 import priceRoutes from './routes/priceRoutes.js'
 import gpuRoutes from './routes/gpuRoutes.js'
 import giganttiRoutes from './routes/giganttiRoutes.js'
+import cors from 'cors';
 
 const app = express();
+app.use(cors());
 
 app.use(express.json());
 app.use('/api/cpus', cpuRoutes);

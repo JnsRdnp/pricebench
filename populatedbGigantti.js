@@ -125,6 +125,7 @@ function parseGiganttiHtml(html) {
 }
 
 function saveGiganttiProductsToDb(products) {
+db.exec('DELETE FROM gigantti_products;'); // clear table first
   const insert = db.transaction((products) => {
     for (const p of products) {
         upsertGiganttiProduct.run(
