@@ -4,4 +4,3 @@ raws
 .git
 .gitignore
 Dockerfile
-docker-entrypoint.sh

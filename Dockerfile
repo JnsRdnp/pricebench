@@ -1,5 +1,5 @@
 # Use official Node.js image
-FROM node:18
+FROM node:20
 
 # Set working directory
 WORKDIR /app
@@ -12,6 +12,9 @@ RUN npm install
 
 # Copy the rest of the app
 COPY . .
+
+# Create necessary folders and run data population scripts at build time
+RUN mkdir -p ./raws ./db && npm run buildBenchmarks && npm run buildGigantti
 
 # Copy and set up entrypoint script
 COPY docker-entrypoint.sh /app/docker-entrypoint.sh
