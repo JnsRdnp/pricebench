@@ -5,12 +5,15 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "downloadGigantti": "node wgetGigantti.js",
-    "downloadBenchmarks": "node wgetBenchmarks.js",
     "benchmarksToDb": "node populatedb.js",
     "giganttiToDb": "node populatedbGigantti.js",
+
+    "downloadBenchmarks": "bash ./getBenchmarks.sh",
+    "downloadGigantti": "bash ./getGigantti.sh",
+
     "buildBenchmarks": "npm run downloadBenchmarks && npm run benchmarksToDb",
     "buildGigantti": "npm run downloadGigantti && npm run giganttiToDb",
+
     "start": "node app.js",
     "dev": "nodemon app.js",
     "test": "mocha"
