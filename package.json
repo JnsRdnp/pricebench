@@ -5,6 +5,12 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
+    "downloadGigantti": "node wgetGigantti.js",
+    "downloadBenchmarks": "node wgetBenchmarks.js",
+    "benchmarksToDb": "node populatedb.js",
+    "giganttiToDb": "node populatedbGigantti.js",
+    "buildBenchmarks": "npm run downloadBenchmarks && npm run benchmarksToDb",
+    "buildGigantti": "npm run downloadGigantti && npm run giganttiToDb",
     "start": "node app.js",
     "dev": "nodemon app.js",
     "test": "mocha"
@@ -24,6 +30,8 @@
     "better-sqlite3": "^12.2.0",
     "chai-http": "^5.1.2",
     "cheerio": "^1.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.0.1",
     "express": "^5.1.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"

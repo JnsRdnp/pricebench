@@ -1,23 +1,23 @@
 import express from 'express';
-import { getCpusByName, getCpusByNameExact } from '../controllers/cpuController.js';
+import { getGpusByName, getGpusByNameExact } from '../controllers/gpuController.js';
 
 const router = express.Router();
 
 /**
  * @swagger
- * /api/cpus:
+ * /api/gpus:
  *   get:
- *     summary: Get CPUs that include the query substring in their name
+ *     summary: Get GPUs that include the query substring in their name
  *     parameters:
  *       - in: query
  *         name: name
  *         schema:
  *           type: string
  *         required: false
- *         description: Substring to search for in CPU names
+ *         description: Substring to search for in GPU names
  *     responses:
  *       200:
- *         description: List of CPUs matching the search
+ *         description: List of GPUs matching the search
  *         content:
  *           application/json:
  *             schema:
@@ -36,23 +36,23 @@ const router = express.Router();
  *       500:
  *         description: Internal server error
  */
-router.get('/', getCpusByName);
+router.get('/', getGpusByName);
 
 /**
  * @swagger
- * /api/cpus/exact:
+ * /api/gpus/exact:
  *   get:
- *     summary: Get CPUs that match the query exactly or closely (dash/space aware)
+ *     summary: Get GPUs that match the query exactly or closely (dash/space aware)
  *     parameters:
  *       - in: query
  *         name: name
  *         schema:
  *           type: string
  *         required: true
- *         description: CPU model string to search for
+ *         description: GPU model string to search for
  *     responses:
  *       200:
- *         description: List of CPUs with an exact or token-aware match
+ *         description: List of GPUs with an exact or token-aware match
  *         content:
  *           application/json:
  *             schema:
@@ -73,6 +73,6 @@ router.get('/', getCpusByName);
  *       500:
  *         description: Internal server error
  */
-router.get('/exact', getCpusByNameExact);
+router.get('/exact', getGpusByNameExact);
 
 export default router;

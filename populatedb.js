@@ -13,7 +13,6 @@ db.exec(`
   );
 `);
 
-
 const upsertSingle = db.prepare(`
   INSERT INTO cpubenchmarks (name, singlethread) VALUES (?, ?)
   ON CONFLICT(name) DO UPDATE SET singlethread=excluded.singlethread
@@ -93,6 +92,7 @@ function parseAndUpdateMulti(filePath) {
 }
 
 
+
 parseAndUpdateSingle('./raws/cpuSingle1.html', 'singlethread');
 parseAndUpdateSingle('./raws/cpuSingle2.html', 'singlethread');
 parseAndUpdateSingle('./raws/cpuSingle3.html', 'singlethread');
@@ -108,3 +108,45 @@ parseAndUpdateMulti('./raws/cpuMulti4.html', 'multithread');
 parseAndUpdateMulti('./raws/cpuMulti5.html', 'multithread');
 parseAndUpdateMulti('./raws/cpuMulti6.html', 'multithread');
 parseAndUpdateMulti('./raws/cpuMulti7.html', 'multithread');
+
+
+
+
+// GPU PART //
+db.exec(`
+  CREATE TABLE IF NOT EXISTS gpubenchmarks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE,
+    benchmark REAL
+  );
+`);
+
+const upsertGPU = db.prepare(`
+  INSERT INTO gpubenchmarks (name, benchmark) VALUES (?, ?)
+  ON CONFLICT(name) DO UPDATE SET benchmark=excluded.benchmark
+`);
+
+
+function parseAndUpdateGPU(filePath) {
+  const html = fs.readFileSync(filePath, 'utf8');
+  const $ = cheerio.load(html);
+
+  $('tr[id^="gpu"]').each((_, elem) => {
+    const tds = $(elem).find('td');
+    const name = $(tds[0]).text().trim().replace(/\s+/g, ' ');
+    const scoreText = $(tds[1]).text().replace(/,/g, '').trim();
+
+    const score = parseFloat(scoreText);
+    if (!name || isNaN(score)) {
+      console.warn(`Invalid GPU score for "${name}": raw scoreText="${scoreText}"`);
+      return;
+    }
+
+    upsertGPU.run(name, score);
+  });
+}
+
+
+
+
+parseAndUpdateGPU('./raws/gpubench.html');

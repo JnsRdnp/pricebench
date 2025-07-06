@@ -2,14 +2,14 @@
 import Database from 'better-sqlite3';
 const db = new Database('./db/data.db');  // your DB file path
 /**
- * Finds CPUs whose names include the given substring.
- * @param {string} partialName - Substring to search for in CPU names.
- * @returns {Array} Array of matching CPU rows.
+ * Finds GPUS whose names include the given substring.
+ * @param {string} partialName - Substring to search for in GPUS names.
+ * @returns {Array} Array of matching GPUS rows.
  */
-export function findCpusByName(partialName) {
+export function findGpusByName(partialName) {
   const stmt = db.prepare(`
-    SELECT id, name, singlethread, multithread
-    FROM cpubenchmarks
+    SELECT id, name, benchmark
+    FROM gpubenchmarks
     WHERE name LIKE ?
     ORDER BY
       CASE
@@ -26,10 +26,10 @@ export function findCpusByName(partialName) {
   return stmt.all(likeParam, partialName, startsWithParam);
 }
 
-export function findCpusByNameExact(partialName) {
+export function findGpusByNameExact(partialName) {
   const stmt = db.prepare(`
-    SELECT id, name, singlethread, multithread
-    FROM cpubenchmarks
+    SELECT id, name, benchmark
+    FROM gpubenchmarks
     WHERE
       name LIKE ? OR    -- space before and after
       name LIKE ? OR    -- dash before, space after
