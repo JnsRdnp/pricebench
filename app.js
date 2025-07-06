@@ -6,15 +6,24 @@ import priceRoutes from './routes/priceRoutes.js'
 import gpuRoutes from './routes/gpuRoutes.js'
 import giganttiRoutes from './routes/giganttiRoutes.js'
 import cors from 'cors';
+import authenticateToken from './middlewares/authToken.js'
+import dotenv from 'dotenv';
+dotenv.config();
+
 
 const app = express();
 app.use(cors());
+app.use(express.json());
 
 app.use(express.json());
+
+app.use('/api', authenticateToken);
+
 app.use('/api/cpus', cpuRoutes);
 app.use('/api/gpus', gpuRoutes);
 app.use('/api/price', priceRoutes);
 app.use('/api/gigantti', giganttiRoutes);
+
 
 
 // Swagger UI setup
