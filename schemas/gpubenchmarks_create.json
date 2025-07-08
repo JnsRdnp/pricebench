@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "nullable": true
+    },
+    "benchmark": {
+      "type": "number",
+      "nullable": true
+    }
+  },
+  "additionalProperties": false
+}
