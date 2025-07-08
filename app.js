@@ -27,10 +27,10 @@ app.use('/api/gigantti', giganttiRoutes);
 
 
 // Swagger UI setup
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.listen(3000, () => {
-  console.log('Server running on http://localhost:3000/api-docs');
+  console.log('Docs running on http://localhost:3000/docs');
 });
 
 export default app; // for testing
