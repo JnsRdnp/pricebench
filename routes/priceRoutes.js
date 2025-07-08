@@ -24,7 +24,6 @@ const router = express.Router();
  *         name: euro
  *         schema:
  *           type: number
- *         required: true
  *         description: Euro amount to calculate value score (multithread / euro)
  *     responses:
  *       200:
@@ -69,7 +68,6 @@ router.get('/cpu', getCpuPerformancePerEuro);
  *         name: euro
  *         schema:
  *           type: number
- *         required: true
  *         description: Euro amount to calculate value score (multithread / euro)
  *     responses:
  *       200:
@@ -114,7 +112,6 @@ router.get('/cpu/exact', getCpuPerformancePerEuroExact);
  *         name: euro
  *         schema:
  *           type: number
- *         required: true
  *         description: Euro amount to calculate value score (benchmark score / euro)
  *     responses:
  *       200:
@@ -157,7 +154,6 @@ router.get('/gpu', getGpuPerformancePerEuro);
  *         name: euro
  *         schema:
  *           type: number
- *         required: true
  *         description: Euro amount to calculate value score (benchmark score / euro)
  *     responses:
  *       200:

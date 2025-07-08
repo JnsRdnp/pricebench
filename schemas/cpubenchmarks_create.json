@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "nullable": true
+    },
+    "singlethread": {
+      "type": "number",
+      "nullable": true
+    },
+    "multithread": {
+      "type": "number",
+      "nullable": true
+    }
+  },
+  "additionalProperties": false
+}

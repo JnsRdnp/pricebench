@@ -11,6 +11,8 @@
     "downloadGigantti": "bash ./getGigantti.sh",
     "buildBenchmarks": "npm run downloadBenchmarks && npm run benchmarksToDb",
     "buildGigantti": "npm run downloadGigantti && npm run giganttiToDb",
+    "gen-models": "npx sequelize-auto -o './models' -d './db/data.db' -e sqlite",
+    "gen-schemas" : "node scripts/generateSchemas.js",
     "start": "node app.js",
     "dev": "nodemon app.js",
     "test": "mocha"
@@ -27,12 +29,15 @@
   },
   "homepage": "https://github.com/JnsRdnp/pricebench#readme",
   "dependencies": {
+    "@techntools/sequelize-to-openapi": "^1.0.0",
     "better-sqlite3": "^12.2.0",
     "chai-http": "^5.1.2",
     "cheerio": "^1.1.0",
     "cors": "^2.8.5",
     "dotenv": "^17.0.1",
     "express": "^5.1.0",
+    "sequelize-auto": "^0.8.8",
+    "sqlite3": "^5.1.7",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
   },

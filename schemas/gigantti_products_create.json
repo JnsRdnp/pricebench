@@ -1,0 +1,54 @@
+{
+  "type": "object",
+  "properties": {
+    "sku": {
+      "type": "string",
+      "nullable": true
+    },
+    "name": {
+      "type": "string",
+      "nullable": true
+    },
+    "price": {
+      "type": "number",
+      "nullable": true
+    },
+    "availability": {
+      "type": "string",
+      "nullable": true
+    },
+    "imageUrl": {
+      "type": "string",
+      "nullable": true
+    },
+    "link": {
+      "type": "string",
+      "nullable": true
+    },
+    "cpuName": {
+      "type": "string",
+      "nullable": true
+    },
+    "gpuName": {
+      "type": "string",
+      "nullable": true
+    },
+    "cpuPerformanceJson": {
+      "type": "string",
+      "nullable": true
+    },
+    "gpuPerformanceJson": {
+      "type": "string",
+      "nullable": true
+    },
+    "combinedValueScore": {
+      "type": "number",
+      "nullable": true
+    },
+    "specsJson": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  "additionalProperties": false
+}

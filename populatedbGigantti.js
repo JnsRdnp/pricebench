@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs, { cp } from 'fs';
 import Database from 'better-sqlite3';
 import * as cheerio from 'cheerio';
 import { findCpuPerformancePerEuroExact, findGpuPerformancePerEuroExact } from './services/priceService.js';
@@ -8,29 +8,34 @@ const db = new Database('./db/data.db');
 // ... Your CPU and GPU benchmark tables and upserts here ...
 
 // Create Gigantti products table and upsert
+db.exec(`DROP TABLE IF EXISTS gigantti_products;`);
+
 db.exec(`
-    CREATE TABLE IF NOT EXISTS gigantti_products (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    sku TEXT UNIQUE,
-    name TEXT,
-    price REAL,
-    availability TEXT,
-    imageUrl TEXT,
-    link TEXT,
-    cpuName TEXT,
-    gpuName TEXT,
-    cpuPerformanceJson TEXT,
-    gpuPerformanceJson TEXT,
-    combinedValueScore REAL,
-    specsJson TEXT
+    CREATE TABLE gigantti_products (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sku TEXT UNIQUE,
+        name TEXT,
+        price REAL,
+        availability TEXT,
+        imageUrl TEXT,
+        link TEXT,
+        cpuName TEXT,
+        gpuName TEXT,
+        cpuPerformanceJson TEXT,
+        gpuPerformanceJson TEXT,
+        combinedValueScore REAL,
+        combinedValueScoreLessCpu REAL,
+        cpuValueScore REAL,
+        gpuValueScore REAL,
+        specsJson TEXT
     );
 `);
 
 const upsertGiganttiProduct = db.prepare(`
   INSERT INTO gigantti_products (
     sku, name, price, availability, imageUrl, link, cpuName, gpuName,
-    cpuPerformanceJson, gpuPerformanceJson, combinedValueScore, specsJson
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    cpuPerformanceJson, gpuPerformanceJson, combinedValueScore, combinedValueScoreLessCpu, cpuValueScore, gpuValueScore, specsJson)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   ON CONFLICT(sku) DO UPDATE SET
     name=excluded.name,
     price=excluded.price,
@@ -42,6 +47,9 @@ const upsertGiganttiProduct = db.prepare(`
     cpuPerformanceJson=excluded.cpuPerformanceJson,
     gpuPerformanceJson=excluded.gpuPerformanceJson,
     combinedValueScore=excluded.combinedValueScore,
+    combinedValueScoreLessCpu=excluded.combinedValueScoreLessCpu,
+    cpuValueScore=excluded.cpuValueScore,
+    gpuValueScore=excluded.gpuValueScore,
     specsJson=excluded.specsJson;
 `);
 
@@ -56,6 +64,7 @@ function cleanComponentName(name) {
   return name.replace(/\s*-?näytönohjain\s*$/i, '')
              .replace(/\s*-?prosessori\s*$/i, '')
              .trim();
+
 }
 
 function extractLastComponent(name) {
@@ -63,12 +72,24 @@ function extractLastComponent(name) {
   const parts = name.trim().split(' ');
   const last = parts[parts.length - 1].toLowerCase();
 
-  if (last === 'ti' || last === 'pro') {
+  if (last === 'ti' || last === 'pro' || last === 'xt') {
     if (parts.length >= 2) {
       return parts.slice(parts.length - 2).join(' ');
     }
   }
+
   return parts[parts.length - 1];
+}
+
+function extractWrongstyleName(name) {
+  switch (name) {
+    case '5-8645HS':
+      return '5 8645HS';
+    case '7-8845HS':
+      return '7 8845HS';
+    default:
+      return name; // fallback to original if not matched
+  }
 }
 
 function parseGiganttiHtml(html) {
@@ -96,13 +117,30 @@ function parseGiganttiHtml(html) {
     const cpuNameCleaned = cleanComponentName(rawCpuName);
     const gpuNameCleaned = cleanComponentName(rawGpuName);
 
-    const cpuName = extractLastComponent(cpuNameCleaned);
-    const gpuName = extractLastComponent(gpuNameCleaned);
+    const cpuNameExtracted = extractLastComponent(cpuNameCleaned);
+    const gpuNameExtracted = extractLastComponent(gpuNameCleaned);
+
+    const cpuName = extractWrongstyleName(cpuNameExtracted)
+    const gpuName = extractWrongstyleName(gpuNameExtracted)
+
+
+    let gpuNameLaptopCheck = gpuName;  // Start with the base GPU name
+
+    if (name.toLowerCase().includes('kannettava')) {
+      gpuNameLaptopCheck += ' laptop'; // Add "laptop" if it's a notebook
+    }
+
+    console.log(gpuNameLaptopCheck);
 
     const cpuPerformance = priceNumber ? findCpuPerformancePerEuroExact(cpuName, priceNumber)[0] || null : null;
-    const gpuPerformance = priceNumber ? findGpuPerformancePerEuroExact(gpuName, priceNumber)[0] || null : null;
+    const gpuPerformance = priceNumber ? findGpuPerformancePerEuroExact(gpuNameLaptopCheck, priceNumber)[0] || null : null;
 
     const combinedValueScore = (cpuPerformance?.valueScore || 0) + (gpuPerformance?.valueScore || 0);
+
+    const cpuValueScore = cpuPerformance?.valueScore
+    const gpuValueScore = gpuPerformance?.valueScore
+
+    const combinedValueScoreLessCpu = ((cpuPerformance?.valueScore/2) || 0) + (gpuPerformance?.valueScore || 0);
 
     products.push({
       name,
@@ -115,9 +153,12 @@ function parseGiganttiHtml(html) {
       specs,
       cpuName,
       cpuPerformance,
-      gpuName,
+      gpuName: gpuNameLaptopCheck,
       gpuPerformance,
       combinedValueScore,
+      combinedValueScoreLessCpu,
+      cpuValueScore,
+      gpuValueScore,
     });
   });
 
@@ -140,6 +181,9 @@ db.exec('DELETE FROM gigantti_products;'); // clear table first
         JSON.stringify(p.cpuPerformance),
         JSON.stringify(p.gpuPerformance),
         p.combinedValueScore,
+        p.combinedValueScoreLessCpu,
+        p.cpuValueScore,
+        p.gpuValueScore,
         JSON.stringify(p.specs) // add this line for specs
         );
     }

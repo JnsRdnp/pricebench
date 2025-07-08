@@ -2,14 +2,14 @@ import { findCpuPerformancePerEuro, findCpuPerformancePerEuroExact, findGpuPerfo
 
 export async function getCpuPerformancePerEuro(req, res) {
   try {
-    const { name = '', euro = '' } = req.query;
+    const { name = '', euro } = req.query;
+    const euroValue = isNaN(parseFloat(euro)) ? 1 : parseFloat(euro);
 
-    // Validate inputs
-    if (!name || !euro || isNaN(euro)) {
-      return res.status(400).json({ error: 'Missing or invalid query parameters: name and euro are required.' });
+    if (!name) {
+      return res.status(400).json({ error: 'Missing required query parameter: name.' });
     }
 
-    const cpus = findCpuPerformancePerEuro(name, parseFloat(euro));
+    const cpus = findCpuPerformancePerEuro(name, euroValue);
     res.json(cpus);
   } catch (error) {
     console.error('Error fetching CPUs:', error);
@@ -19,14 +19,14 @@ export async function getCpuPerformancePerEuro(req, res) {
 
 export async function getCpuPerformancePerEuroExact(req, res) {
   try {
-    const { name = '', euro = '' } = req.query;
+    const { name = '', euro } = req.query;
+    const euroValue = isNaN(parseFloat(euro)) ? 1 : parseFloat(euro);
 
-    // Validate inputs
-    if (!name || !euro || isNaN(euro)) {
-      return res.status(400).json({ error: 'Missing or invalid query parameters: name and euro are required.' });
+    if (!name) {
+      return res.status(400).json({ error: 'Missing required query parameter: name.' });
     }
 
-    const cpus = findCpuPerformancePerEuroExact(name, parseFloat(euro));
+    const cpus = findCpuPerformancePerEuroExact(name, euroValue);
     res.json(cpus);
   } catch (error) {
     console.error('Error fetching CPUs:', error);
@@ -34,18 +34,17 @@ export async function getCpuPerformancePerEuroExact(req, res) {
   }
 }
 
-
 export async function getGpuPerformancePerEuro(req, res) {
   try {
-    const { name = '', euro = '' } = req.query;
+    const { name = '', euro } = req.query;
+    const euroValue = isNaN(parseFloat(euro)) ? 1 : parseFloat(euro);
 
-    // Validate inputs
-    if (!name || !euro || isNaN(euro)) {
-      return res.status(400).json({ error: 'Missing or invalid query parameters: name and euro are required.' });
+    if (!name) {
+      return res.status(400).json({ error: 'Missing required query parameter: name.' });
     }
 
-    const cpus = findGpuPerformancePerEuro(name, parseFloat(euro));
-    res.json(cpus);
+    const gpus = findGpuPerformancePerEuro(name, euroValue);
+    res.json(gpus);
   } catch (error) {
     console.error('Error fetching GPUs:', error);
     res.status(500).json({ error: 'Failed to fetch GPU data' });
@@ -54,19 +53,17 @@ export async function getGpuPerformancePerEuro(req, res) {
 
 export async function getGpuPerformancePerEuroExact(req, res) {
   try {
-    const { name = '', euro = '' } = req.query;
+    const { name = '', euro } = req.query;
+    const euroValue = isNaN(parseFloat(euro)) ? 1 : parseFloat(euro);
 
-    // Validate inputs
-    if (!name || !euro || isNaN(euro)) {
-      return res.status(400).json({ error: 'Missing or invalid query parameters: name and euro are required.' });
+    if (!name) {
+      return res.status(400).json({ error: 'Missing required query parameter: name.' });
     }
 
-    const cpus = findGpuPerformancePerEuroExact(name, parseFloat(euro));
-    res.json(cpus);
+    const gpus = findGpuPerformancePerEuroExact(name, euroValue);
+    res.json(gpus);
   } catch (error) {
     console.error('Error fetching GPUs:', error);
     res.status(500).json({ error: 'Failed to fetch GPU data' });
   }
 }
-
-
