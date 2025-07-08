@@ -7,7 +7,7 @@ import { findGpusByName, findGpusByNameExact } from "./gpuService.js";
  * @param {number} euro - Euro amount to divide the performance by.
  * @returns {Array} CPUs with added valueScore and euro field.
  */
-export function findCpuPerformancePerEuro(name, euro) {
+export function findCpuPerformancePerEuro(name, euro=1) {
   const cpus = findCpusByName(name);
   if (!cpus.length) return [];
 
@@ -18,7 +18,7 @@ export function findCpuPerformancePerEuro(name, euro) {
   }));
 }
 
-export function findCpuPerformancePerEuroExact(name, euro) {
+export function findCpuPerformancePerEuroExact(name, euro=1) {
   const cpus = findCpusByNameExact(name);
   if (!cpus.length) return [];
 
@@ -35,7 +35,7 @@ export function findCpuPerformancePerEuroExact(name, euro) {
  * @param {number} euro - Euro amount to divide the performance by.
  * @returns {Array} GPUs with added valueScore and euro field.
  */
-export function findGpuPerformancePerEuro(name, euro) {
+export function findGpuPerformancePerEuro(name, euro=1) {
   const gpus = findGpusByName(name);
   if (!gpus.length) return [];
 
@@ -46,7 +46,7 @@ export function findGpuPerformancePerEuro(name, euro) {
   }));
 }
 
-export function findGpuPerformancePerEuroExact(name, euro) {
+export function findGpuPerformancePerEuroExact(name, euro=1) {
   const gpus = findGpusByNameExact(name);
   if (!gpus.length) return [];
 
