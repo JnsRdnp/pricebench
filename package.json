@@ -35,6 +35,7 @@
     "dotenv": "^17.0.1",
     "express": "^5.1.0",
     "sequelize-auto": "^0.8.8",
+    "sqlite3": "^5.1.7",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
   },
