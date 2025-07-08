@@ -10,6 +10,9 @@ import authenticateToken from './middlewares/authToken.js'
 import dotenv from 'dotenv';
 dotenv.config();
 
+import gigantti_productsRoutes from './routes/gigantti_productsRoutes.js'
+import cpubenchmarkRoutes from './routes/cpubenchmarksRoutes.js'
+import gpubenchmarkRoutes from './routes/gpubenchmarksRoutes.js'
 
 const app = express();
 app.use(cors());
@@ -17,12 +20,16 @@ app.use(express.json());
 
 app.use(express.json());
 
-app.use('/api', authenticateToken);
+// app.use('/api', authenticateToken);
 
 app.use('/api/cpus', cpuRoutes);
 app.use('/api/gpus', gpuRoutes);
 app.use('/api/price', priceRoutes);
 app.use('/api/gigantti', giganttiRoutes);
+
+app.use('/api/gigantti_products', gigantti_productsRoutes)
+app.use('/api/cpubenchmarks', cpubenchmarkRoutes)
+app.use('/api/gpubenchmarks', gpubenchmarkRoutes)
 
 
 

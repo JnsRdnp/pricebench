@@ -32,13 +32,14 @@ function swaggerSchemaProperties(swaggerProps) {
   return str;
 }
 
-function generateRoutes(resource, swaggerProps, createSchemaProps) {
+export function generateRoutes(resource, swaggerProps, createSchemaProps) {
   const Resource = capitalize(resource);
   const CreateSchemaName = `${Resource}_create`;
 
-  return `const express = require('express');
+  return `import express from 'express';
+import ${resource}Controller from '../controllers/${resource}Controller.js';
+
 const router = express.Router();
-const ${resource}Controller = require('../controllers/${resource}Controller');
 
 /**
  * @swagger
@@ -55,17 +56,39 @@ ${swaggerSchemaProperties(createSchemaProps)}
  *
  * /api/${resource}:
  *   get:
- *     summary: Get all ${resource}
+ *     summary: Get all ${resource} (paginated)
  *     tags: [${Resource}]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of items per page
  *     responses:
  *       200:
- *         description: List of all ${resource}
+ *         description: List of ${resource}
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/${Resource}'
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/${Resource}'
+ *                 page:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
+ *                 total:
+ *                   type: integer
  */
 router.get('/', ${resource}Controller.getAll);
 
@@ -159,25 +182,27 @@ router.put('/:id', ${resource}Controller.update);
  */
 router.delete('/:id', ${resource}Controller.remove);
 
-module.exports = router;
+export default router;
 `;
 }
 
-function generateController(resource) {
+export function generateController(resource) {
   const Resource = capitalize(resource);
 
-  return `const ${resource}Service = require('../services/${resource}Service');
+  return `import ${resource}Service from '../services/${resource}Service.js';
 
-exports.getAll = async (req, res) => {
+const getAll = async (req, res) => {
   try {
-    const items = await ${resource}Service.getAll();
-    res.json(items);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const result = await ${resource}Service.getAll(page, limit);
+    res.json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-exports.getById = async (req, res) => {
+const getById = async (req, res) => {
   try {
     const item = await ${resource}Service.getById(req.params.id);
     if (!item) return res.status(404).json({ message: '${Resource} not found' });
@@ -187,7 +212,7 @@ exports.getById = async (req, res) => {
   }
 };
 
-exports.create = async (req, res) => {
+const create = async (req, res) => {
   try {
     const created = await ${resource}Service.create(req.body);
     res.status(201).json(created);
@@ -196,7 +221,7 @@ exports.create = async (req, res) => {
   }
 };
 
-exports.update = async (req, res) => {
+const update = async (req, res) => {
   try {
     const updated = await ${resource}Service.update(req.params.id, req.body);
     if (!updated) return res.status(404).json({ message: '${Resource} not found' });
@@ -206,7 +231,7 @@ exports.update = async (req, res) => {
   }
 };
 
-exports.remove = async (req, res) => {
+const remove = async (req, res) => {
   try {
     const deleted = await ${resource}Service.remove(req.params.id);
     if (!deleted) return res.status(404).json({ message: '${Resource} not found' });
@@ -215,48 +240,74 @@ exports.remove = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export default {
+  getAll,
+  getById,
+  create,
+  update,
+  remove,
+};
 `;
 }
 
-function generateService(resource) {
+export function generateService(resource) {
   const Resource = capitalize(resource);
 
-  return `const sequelize = require('../config/dbConfig');
-const initModels = require('../models/init-models');
-
-const { ${resource} } = initModels(sequelize);
+  return `import Database from 'better-sqlite3';
+const db = new Database('./db/data.db'); // Adjust DB path as needed
 
 class ${Resource}Service {
-  async getAll() {
-    return ${resource}.findAll();
+  async getAll(page = 1, limit = 10) {
+    const offset = (page - 1) * limit;
+    const totalStmt = db.prepare('SELECT COUNT(*) as count FROM ${resource}');
+    const totalResult = totalStmt.get();
+    const total = totalResult.count;
+
+    const stmt = db.prepare('SELECT * FROM ${resource} LIMIT ? OFFSET ?');
+    const data = stmt.all(limit, offset);
+
+    return { data, page, limit, total };
   }
 
   async getById(id) {
-    return ${resource}.findByPk(id);
+    const stmt = db.prepare('SELECT * FROM ${resource} WHERE id = ?');
+    return stmt.get(id);
   }
 
   async create(data) {
-    return ${resource}.create(data);
+    const keys = Object.keys(data);
+    const placeholders = keys.map(() => '?').join(', ');
+    const stmt = db.prepare(\`INSERT INTO ${resource} (\${keys.join(', ')}) VALUES (\${placeholders})\`);
+    const info = stmt.run(...keys.map(k => data[k]));
+    return this.getById(info.lastInsertRowid);
   }
 
   async update(id, data) {
-    const item = await ${resource}.findByPk(id);
-    if (!item) throw new Error('${Resource} not found');
-    return item.update(data);
+    const keys = Object.keys(data);
+    if (keys.length === 0) throw new Error('No data to update');
+
+    const assignments = keys.map(k => \`\${k} = ?\`).join(', ');
+    const stmt = db.prepare(\`UPDATE ${resource} SET \${assignments} WHERE id = ?\`);
+    const info = stmt.run(...keys.map(k => data[k]), id);
+
+    if (info.changes === 0) throw new Error('${Resource} not found');
+    return this.getById(id);
   }
 
   async remove(id) {
-    const item = await ${resource}.findByPk(id);
-    if (!item) throw new Error('${Resource} not found');
-    return item.destroy();
+    const stmt = db.prepare('DELETE FROM ${resource} WHERE id = ?');
+    const info = stmt.run(id);
+    if (info.changes === 0) throw new Error('${Resource} not found');
+    return true;
   }
 }
 
-module.exports = new ${Resource}Service();
+export default new ${Resource}Service();
 `;
 }
 
-function generateAllFromSchemas(schemaDir) {
+export function generateAllFromSchemas(schemaDir) {
   const schemas = readSchemas(schemaDir);
 
   const baseSchemas = {};
@@ -270,9 +321,9 @@ function generateAllFromSchemas(schemaDir) {
     }
   });
 
-  const routesPath = path.join(__dirname, '../routes');
-  const controllersPath = path.join(__dirname, '../controllers');
-  const servicesPath = path.join(__dirname, '../services');
+  const routesPath = path.join(process.cwd(), 'routes');
+  const controllersPath = path.join(process.cwd(), 'controllers');
+  const servicesPath = path.join(process.cwd(), 'services');
 
   if (!fs.existsSync(routesPath)) fs.mkdirSync(routesPath);
   if (!fs.existsSync(controllersPath)) fs.mkdirSync(controllersPath);
@@ -318,6 +369,6 @@ function generateAllFromSchemas(schemaDir) {
   }
 }
 
-// Run generation
-const schemaFolder = path.join(__dirname, '../schemas');
+// Run generation (you can adjust the folder path accordingly)
+const schemaFolder = path.join(process.cwd(), 'schemas');
 generateAllFromSchemas(schemaFolder);

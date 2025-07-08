@@ -63,7 +63,7 @@ function extractLastComponent(name) {
   const parts = name.trim().split(' ');
   const last = parts[parts.length - 1].toLowerCase();
 
-  if (last === 'ti' || last === 'pro') {
+  if (last === 'ti' || last === 'pro' || last === 'XT') {
     if (parts.length >= 2) {
       return parts.slice(parts.length - 2).join(' ');
     }
